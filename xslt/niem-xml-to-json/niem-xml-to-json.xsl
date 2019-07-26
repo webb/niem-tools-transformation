@@ -65,7 +65,7 @@
     <value-of select="if (ends-with($uri, '#')) then $uri else concat($uri, '#')"/>
   </function>
 
-  <template match="@xsi:nil"/>
+  <template match="@xsi:nil | @xml:base"/>
 
   <template match="@structures:id | @structures:ref | @structures:uri">
     <xpf:string key="@id">
