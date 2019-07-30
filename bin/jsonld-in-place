@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+. "$HOME"/share/wrtools-core/fail.bash
+. "$HOME"/share/wrtools-core/opt_verbose.bash
+
+opt_verbose
+
+(( $# > 0 )) || fail "Missing argument: JSON-LD input file name"
+jsonld_file="$1"
+vecho "Input file is $jsonld_file"
+[[ -f $jsonld_file && -r $jsonld_file ]] || fail "Input file is not a readable file: $jsonld_file"
+shift 1
+
+while (( $# > 0 ))
+do case "$1" in
+       compact )
+           [[ $2 = "-c" ]] || fail "need to specify a context using option -c"
+           [[ -f $3 && -r $3 ]] || fail "context is not a readable file: $jsonld_file"
+           orig_file=$(dirname "$jsonld_file")/tmp.$(basename "$jsonld_file").compact.before
+           compacted_file=$(dirname "$jsonld_file")/tmp.$(basename "$jsonld_file").compact.after
+           vrun cp "$jsonld_file" "$orig_file"
+           vrun jsonld compact -c "$3" "$jsonld_file" > "$compacted_file"
+           vrun cat "$compacted_file" > "$jsonld_file"
+           shift 3
+           ;;
+       expand )
+           orig_file=$(dirname "$jsonld_file")/tmp.$(basename "$jsonld_file").expand.before
+           expanded_file=$(dirname "$jsonld_file")/tmp.$(basename "$jsonld_file").expand.after
+           vrun cp "$jsonld_file" "$orig_file"
+           vrun jsonld expand "$jsonld_file" > "$expanded_file"
+           vrun cat "$expanded_file" > "$jsonld_file"
+           shift 1
+           ;;
+       * )
+           fail "unknown command: $1"
+           exit 1
+           ;;
+   esac
+done
